@@ -73,6 +73,7 @@ public class KtvUserController {
 
     /**
      * TODO VIP操作的CRUD（查询vip列表，修改vip状态，注册vip）
+     * TODO 顾客可以点餐（查询菜单，下单， 取消菜单）
      */
 }
 

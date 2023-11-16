@@ -14,8 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -88,6 +90,36 @@ public class KtvHouseController {
         orderHouse.setStatus(status);
         orderHouseService.updateById(orderHouse);
         return R.out(ResponseEnum.SUCCESS);
+    }
+
+    /**
+     * 查询超时 + 未使用包房
+     */
+    @GetMapping("/getUnUseList")
+    public R getUnUseList() {
+        // 查询未使用包房订单
+        QueryWrapper<KtvOrderHouse> wrapper = new QueryWrapper<>();
+        wrapper.eq("status", 0);
+        List<KtvOrderHouse> houseList = orderHouseService.list(wrapper);
+
+        // 判断是否超时（预定时间 < 当前）
+        List<KtvOrderHouse> overList = new ArrayList<>();
+        List<KtvOrderHouse> unOverList = new ArrayList<>();
+        for (KtvOrderHouse orderHouse : houseList) {
+            // 说明过期
+            if (orderHouse.getCreateTime().isBefore(LocalDateTime.now())) {
+                overList.add(orderHouse);
+            }
+            // 说明没过期
+            else {
+                unOverList.add(orderHouse);
+            }
+        }
+
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("over", overList);
+        resultMap.put("unOver", unOverList);
+        return R.out(ResponseEnum.SUCCESS, resultMap);
     }
 }
 
