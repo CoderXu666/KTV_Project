@@ -1,15 +1,20 @@
 package com.ktv.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ktv.pojo.KtvHouse;
 import com.ktv.pojo.KtvOrderHouse;
+import com.ktv.pojo.KtvUser;
 import com.ktv.service.KtvHouseService;
 import com.ktv.service.KtvOrderHouseService;
+import com.ktv.service.KtvUserService;
 import com.ktv.utils.R;
 import com.ktv.utils.ResponseEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,6 +28,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/house")
 public class KtvHouseController {
+    @Autowired
+    private KtvUserService userService;
     @Autowired
     private KtvHouseService houseService;
     @Autowired
@@ -40,8 +47,16 @@ public class KtvHouseController {
     /**
      * 预定包房
      */
-    @PostMapping("/book/{accountId}/{houseId}")
-    public R bookHouse(@PathVariable String accountId, @PathVariable Long houseId) {
+    @PostMapping("/book")
+    public R bookHouse(String accountId, Long houseId, LocalDateTime bookTime) {
+        // 判断是否是会员
+        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
+        wrapper.eq("account_id", accountId);
+        KtvUser userPO = userService.getOne(wrapper);
+        if (!userPO.getRole().equals(6)) {
+            return R.out(ResponseEnum.FAIL, "不能预定，你不是VIP");
+        }
+
         // 判断数量还有没有
         KtvHouse housePO = houseService.getById(houseId);
         if (housePO.getUseCount() == housePO.getCount()) {
@@ -58,6 +73,7 @@ public class KtvHouseController {
         orderHouse.setAccountId(accountId);
         orderHouse.setHouseId(houseId);
         orderHouse.setStatus(0);
+        orderHouse.setCreateTime(bookTime);
         orderHouseService.save(orderHouse);
         return R.out(ResponseEnum.SUCCESS);
     }

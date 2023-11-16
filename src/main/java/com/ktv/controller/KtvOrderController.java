@@ -2,8 +2,10 @@ package com.ktv.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.ktv.pojo.KtvHouse;
 import com.ktv.pojo.KtvOrderGoods;
 import com.ktv.pojo.KtvOrderHouse;
+import com.ktv.service.KtvHouseService;
 import com.ktv.service.KtvOrderGoodsService;
 import com.ktv.service.KtvOrderHouseService;
 import com.ktv.utils.R;
@@ -31,6 +33,8 @@ public class KtvOrderController {
     private KtvOrderGoodsService goodsService;
     @Autowired
     private KtvOrderHouseService houseService;
+    @Autowired
+    private KtvHouseService ktvHouseService;
 
     /**
      * 用户查询订单
@@ -71,6 +75,42 @@ public class KtvOrderController {
             orderGoods.setId(id);
             orderGoods.setStatus(4);
             goodsService.updateById(orderGoods);
+        }
+        return R.out(ResponseEnum.SUCCESS);
+    }
+
+    /**
+     * 切换订单状态（只针对工作人员）
+     * 比如：厨师做完菜，切换了状态，用户付完款，是不是订单改成已付款
+     */
+    @PostMapping("/updateStatus/{type}/{orderId}/{status}")
+    public R updateStatus(@PathVariable Integer type, @PathVariable Long orderId, @PathVariable Integer status) {
+        // 你是包房
+        if (type == 1) {
+            // 切换包房订单状态
+            KtvOrderHouse orderHouse = new KtvOrderHouse();
+            orderHouse.setId(orderId);
+            orderHouse.setStatus(status);
+            houseService.updateById(orderHouse);
+            // 特殊情况：如果取消包房
+            KtvOrderHouse houseOrderPO = houseService.getById(orderId);
+            Long houseId = houseOrderPO.getHouseId();
+            // 查询包房信息
+            KtvHouse housePO = ktvHouseService.getById(houseId);
+            Integer useCount = housePO.getUseCount();
+            // 修改可使用包房数量
+            KtvHouse house = new KtvHouse();
+            house.setId(houseId);
+            house.setUseCount(useCount - 1);
+            ktvHouseService.updateById(house);
+        }
+
+        // 你是菜品
+        else {
+            KtvOrderGoods orderGood = new KtvOrderGoods();
+            orderGood.setId(orderId);
+            orderGood.setStatus(status);
+            goodsService.updateById(orderGood);
         }
         return R.out(ResponseEnum.SUCCESS);
     }

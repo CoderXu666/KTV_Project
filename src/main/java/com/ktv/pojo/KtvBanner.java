@@ -13,60 +13,36 @@ import lombok.EqualsAndHashCode;
 
 /**
  * <p>
- * 账号
+ * KTV公告
  * </p>
  *
  * @author ${author}
- * @since 2023-11-15
+ * @since 2023-11-16
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("ktv_user")
-public class KtvUser implements Serializable {
+@TableName("ktv_banner")
+public class KtvBanner implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * 主键
+     * 主键id
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
-     * 昵称
+     * 公告内容
      */
-    @TableField("nick_name")
-    private String nickName;
+    @TableField("content")
+    private String content;
 
     /**
-     * 账号
+     * 公告url
      */
-    @TableField("account_id")
-    private String accountId;
-
-    /**
-     * 密码
-     */
-    @TableField("password")
-    private String password;
-
-    /**
-     * 金额
-     */
-    @TableField("money")
-    private Integer money;
-
-    /**
-     * 电话号
-     */
-    @TableField("phone")
-    private String phone;
-
-    /**
-     * 角色（1：经理，2：收银，3：服务，4：后厨，5：顾客，6：会员）
-     */
-    @TableField("role")
-    private Integer role;
+    @TableField("url")
+    private String url;
 
     /**
      * 创建时间
