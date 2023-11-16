@@ -1,6 +1,7 @@
 package com.ktv.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ktv.pojo.KtvUser;
 import com.ktv.service.KtvUserService;
@@ -73,6 +74,88 @@ public class KtvUserController {
 
     /**
      * TODO VIP操作的CRUD（查询vip列表，修改vip状态，注册vip）
+     * TODO 顾客可以点餐（查询菜单，下单， 取消菜单）
+     */
+
+    /**
+     * 查询vip列表
+     */
+    @GetMapping("/getVipList")
+    public R getVipList(){
+        // 查询vip用户
+        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
+        wrapper.eq("role",6);
+        List<KtvUser> vipList = userService.list(wrapper);
+        return R.out(ResponseEnum.SUCCESS, vipList);
+    }
+
+    /**
+     * 修改vip状态
+     */
+    @PostMapping("/updateVip/{account_id}/{role}")
+    public R updateVip(@PathVariable String account_id, @PathVariable Integer role){
+        // 查询vip信息
+        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
+        wrapper.eq("account_id", account_id);
+        KtvUser user = userService.getOne(wrapper);
+
+        // 如果用户不存在
+        if (user == null) {
+            return R.out(ResponseEnum.FAIL, "用户不存在");
+        }
+
+        // 更新用户角色
+        user.setRole(role);
+        boolean updated = userService.updateById(user);
+
+        // 检查更新是否成功
+        if(updated) {
+            return R.out(ResponseEnum.SUCCESS, "VIP状态更新成功");
+        } else {
+            return R.out(ResponseEnum.FAIL, "VIP状态更新失败");
+        }
+    }
+
+    /**
+     * 注册vip
+     */
+    @PostMapping("/registerVip/{account_id}")
+    public R registerVip(@PathVariable String account_id){
+        // 查询用户
+        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
+        wrapper.eq("account_id", account_id);
+        KtvUser user = userService.getOne(wrapper);
+
+        // 用户是否存在
+        if(user == null){
+            return R.out(ResponseEnum.FAIL,"用户不存在");
+        }
+        // 如果是vip
+        if(user.getRole() != null && user.getRole().equals(6)){
+            return R.out(ResponseEnum.SUCCESS,"用户是vip");
+
+        }
+
+        // 不是vip，设为vip
+        user.setRole(6);
+        boolean updated = userService.updateById(user);
+        if(updated){
+            return R.out(ResponseEnum.SUCCESS, "注册vip成功");
+        } else{
+            return R.out(ResponseEnum.FAIL, "注册vip失败");
+        }
+    }
+
+    /**
+     * 查询菜单
+     */
+
+    /**
+     * 下单
+     */
+
+    /**
+     * 取消菜单
      */
 }
 
