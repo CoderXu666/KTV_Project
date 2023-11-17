@@ -72,7 +72,42 @@ public class KtvUserController {
     }
 
     /**
-     * TODO VIP操作的CRUD（查询vip列表，修改vip状态，注册vip）
+     * 查询vip列表
      */
+    @GetMapping("/getVipList")
+    public R getVipList(){
+        // 查询vip用户
+        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
+        wrapper.eq("role",6);
+        List<KtvUser> vipList = userService.list(wrapper);
+        return R.out(ResponseEnum.SUCCESS, vipList);
+    }
+
+    /**
+     * 修改vip状态
+     */
+    @PostMapping("/updateVip/{accountId}/{role}")
+    public R updateVip(@PathVariable String accountId, @PathVariable Integer role){
+        // 查询vip信息
+        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
+        wrapper.eq("account_id", accountId);
+        KtvUser user = userService.getOne(wrapper);
+
+        // 如果用户不存在
+        if (user == null) {
+            return R.out(ResponseEnum.FAIL, "用户不存在");
+        }
+
+        // 更新用户角色
+        user.setRole(role);
+        boolean updated = userService.updateById(user);
+
+        // 检查更新是否成功
+        if(updated) {
+            return R.out(ResponseEnum.SUCCESS, "VIP状态更新成功");
+        } else {
+            return R.out(ResponseEnum.FAIL, "VIP状态更新失败");
+        }
+    }
 }
 

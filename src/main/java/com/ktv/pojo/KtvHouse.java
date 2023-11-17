@@ -1,12 +1,13 @@
 package com.ktv.pojo;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -34,6 +35,12 @@ public class KtvHouse implements Serializable {
      */
     @TableField("size")
     private String size;
+
+    /**
+     * 包房定金
+     */
+    @TableField("book_price")
+    private Integer bookPrice;
 
     /**
      * 包房价格
