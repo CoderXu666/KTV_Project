@@ -32,6 +32,12 @@ public class KtvOrderGoods implements Serializable {
     private Long id;
 
     /**
+     * account_id
+     */
+    @TableField("account_id")
+    private String accountId;
+
+    /**
      * 包房id
      */
     @TableField("house_id")

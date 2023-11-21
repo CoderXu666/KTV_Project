@@ -48,6 +48,7 @@ public class KtvHouseController {
 
     /**
      * 预定包房
+     * 注意：预定前判断是否是会员
      */
     @PostMapping("/book")
     public R bookHouse(String accountId, Long houseId, LocalDateTime bookTime) {

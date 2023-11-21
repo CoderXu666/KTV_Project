@@ -76,7 +76,6 @@ public class KtvUserController {
      */
     @GetMapping("/getVipList")
     public R getVipList(){
-        // 查询vip用户
         QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
         wrapper.eq("role",6);
         List<KtvUser> vipList = userService.list(wrapper);
