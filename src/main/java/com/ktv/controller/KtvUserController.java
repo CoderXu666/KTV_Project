@@ -65,13 +65,11 @@ public class KtvUserController {
     }
 
     /**
-     * 查询所有员工信息
+     * 查询所有用户信息
      */
-    @GetMapping("/getEmpList")
+    @GetMapping("/list")
     public R getList() {
         QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
-        wrapper.ne("role", 5);
-        wrapper.ne("role", 6);
         List<KtvUser> userList = userService.list(wrapper);
         return R.out(ResponseEnum.SUCCESS, userList);
     }
