@@ -6,6 +6,7 @@ import com.ktv.pojo.KtvUser;
 import com.ktv.service.KtvUserService;
 import com.ktv.utils.R;
 import com.ktv.utils.ResponseEnum;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,8 +31,37 @@ public class KtvUserController {
      * 成功切换标识，
      */
     @PostMapping("/login")
-    public R login(String username, String password) {
+    public R login(String accountId, String password) {
+        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
+        wrapper.eq("account_id", accountId);
+        KtvUser userPO = userService.getOne(wrapper);
+        if (ObjectUtils.isEmpty(userPO)) {
+            return R.out(ResponseEnum.FAIL);
+        }
+        if (!password.equals(userPO)) {
+            return R.out(ResponseEnum.FAIL);
+        }
+
+        List<KtvUser> userList = userService.list();
+        for (KtvUser user : userList) {
+            user.setStatus("N");
+        }
+        userService.updateBatchById(userList);
+        userPO.setStatus("Y");
+        userService.updateById(userPO);
         return R.out(ResponseEnum.SUCCESS);
+    }
+
+    /**
+     * 查询登陆中的用户
+     */
+    @GetMapping("/getLoginUser")
+    public R getLoginUser() {
+        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
+        wrapper.eq("status", "Y");
+        List<KtvUser> userList = userService.list(wrapper);
+        KtvUser user = userList.get(0);
+        return R.out(ResponseEnum.SUCCESS, user);
     }
 
     /**

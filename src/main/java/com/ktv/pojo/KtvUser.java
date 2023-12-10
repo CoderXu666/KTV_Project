@@ -74,6 +74,9 @@ public class KtvUser implements Serializable {
     @TableField("role")
     private Integer role;
 
+    @TableField("status")
+    private String status;
+
     /**
      * 创建时间
      */

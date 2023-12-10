@@ -40,7 +40,7 @@ public class KtvHouseController {
     /**
      * 查询所有包房
      */
-    @GetMapping("/getList")
+    @GetMapping("/list")
     public R getList() {
         List<KtvHouse> list = houseService.list();
         return R.out(ResponseEnum.SUCCESS, list);
