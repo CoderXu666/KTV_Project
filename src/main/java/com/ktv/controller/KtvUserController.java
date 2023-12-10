@@ -26,6 +26,11 @@ public class KtvUserController {
     private KtvUserService userService;
 
     /**
+     * 登录功能
+     * 成功切换标识，
+     */
+
+    /**
      * 查询所有员工信息
      */
     @GetMapping("/getEmpList")

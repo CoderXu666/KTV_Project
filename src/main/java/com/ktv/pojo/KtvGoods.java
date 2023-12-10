@@ -47,5 +47,4 @@ public class KtvGoods implements Serializable {
     @TableField("url")
     private String url;
 
-
 }
