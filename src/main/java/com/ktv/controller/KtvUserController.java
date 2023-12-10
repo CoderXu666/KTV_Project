@@ -29,6 +29,10 @@ public class KtvUserController {
      * 登录功能
      * 成功切换标识，
      */
+    @PostMapping("/login")
+    public R login(String username, String password) {
+        return R.out(ResponseEnum.SUCCESS);
+    }
 
     /**
      * 查询所有员工信息
@@ -80,9 +84,9 @@ public class KtvUserController {
      * 查询vip列表
      */
     @GetMapping("/getVipList")
-    public R getVipList(){
+    public R getVipList() {
         QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
-        wrapper.eq("role",6);
+        wrapper.eq("role", 6);
         List<KtvUser> vipList = userService.list(wrapper);
         return R.out(ResponseEnum.SUCCESS, vipList);
     }
@@ -91,7 +95,7 @@ public class KtvUserController {
      * 修改vip状态
      */
     @PostMapping("/updateVip/{accountId}/{role}")
-    public R updateVip(@PathVariable String accountId, @PathVariable Integer role){
+    public R updateVip(@PathVariable String accountId, @PathVariable Integer role) {
         // 查询vip信息
         QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
         wrapper.eq("account_id", accountId);
@@ -107,7 +111,7 @@ public class KtvUserController {
         boolean updated = userService.updateById(user);
 
         // 检查更新是否成功
-        if(updated) {
+        if (updated) {
             return R.out(ResponseEnum.SUCCESS, "VIP状态更新成功");
         } else {
             return R.out(ResponseEnum.FAIL, "VIP状态更新失败");

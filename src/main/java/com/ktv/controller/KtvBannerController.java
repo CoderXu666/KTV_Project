@@ -8,6 +8,8 @@ import com.ktv.utils.ResponseEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -39,8 +41,10 @@ public class KtvBannerController {
     @PostMapping("/save")
     public R save(String content, String url) {
         KtvBanner ktvBanner = new KtvBanner();
-        ktvBanner.setContent(content);
         ktvBanner.setUrl(url);
+        ktvBanner.setContent(content);
+        ktvBanner.setCreateTime(LocalDateTime.now());
+        ktvBanner.setDeleted(false);
         bannerService.save(ktvBanner);
         return R.out(ResponseEnum.SUCCESS);
     }
@@ -60,8 +64,8 @@ public class KtvBannerController {
     /**
      * 删除公告
      */
-    @DeleteMapping("/delete")
-    public R delete(Long id) {
+    @DeleteMapping("/delete/{id}")
+    public R delete(@PathVariable Long id) {
         bannerService.removeById(id);
         return R.out(ResponseEnum.SUCCESS);
     }
