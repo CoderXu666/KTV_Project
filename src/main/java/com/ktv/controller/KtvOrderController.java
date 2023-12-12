@@ -2,14 +2,13 @@ package com.ktv.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.ktv.pojo.KtvHouse;
 import com.ktv.pojo.KtvOrderGoods;
 import com.ktv.pojo.KtvOrderHouse;
-import com.ktv.service.KtvHouseService;
 import com.ktv.service.KtvOrderGoodsService;
 import com.ktv.service.KtvOrderHouseService;
 import com.ktv.utils.R;
 import com.ktv.utils.ResponseEnum;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,11 +35,13 @@ public class KtvOrderController {
     /**
      * 用户查询订单
      */
-    @GetMapping("/getOrderList/{accountId}")
-    public R getList(@PathVariable String accountId) {
+    @GetMapping("/list")
+    public R getList(String accountId) {
         // 查询菜品订单信息
         QueryWrapper<KtvOrderGoods> wrapper1 = new QueryWrapper<>();
-        wrapper1.eq("account_id", accountId);
+        if (StringUtils.isNotEmpty(accountId)) {
+            wrapper1.eq("account_id", accountId);
+        }
         List<KtvOrderGoods> goodOrderList = goodsService.list(wrapper1);
 
 

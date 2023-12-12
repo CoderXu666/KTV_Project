@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -55,23 +53,6 @@ public class KtvHouseController {
     @PostMapping("/update")
     public R update(@RequestBody KtvHouse house) {
         houseService.updateById(house);
-        return R.out(ResponseEnum.SUCCESS);
-    }
-
-    /**
-     * 查询包房预定状态
-     */
-    @GetMapping("/getBookStatus/{accountId}")
-    public R getBookStatus(@PathVariable String accountId) {
-        QueryWrapper<KtvOrderHouse> wrapper = new QueryWrapper<>();
-        wrapper.eq("account_id", accountId);
-        List<KtvOrderHouse> orderHouseList = orderHouseService.list(wrapper);
-
-        // 过滤已使用订单
-        List<KtvOrderHouse> orderHouses = orderHouseList.stream()
-                .filter(item -> item.getStatus() != 1)
-                .collect(Collectors.toList());
-
         return R.out(ResponseEnum.SUCCESS);
     }
 

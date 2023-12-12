@@ -44,12 +44,6 @@ public class KtvOrderGoods implements Serializable {
     private String accountId;
 
     /**
-     * 包房id
-     */
-    @TableField("house_id")
-    private String houseId;
-
-    /**
      * 商品id
      */
     @TableField("good_id")
