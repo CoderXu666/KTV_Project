@@ -10,6 +10,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -41,7 +42,7 @@ public class KtvCommentController {
     /**
      * 查询评论详情（里面子列表）
      */
-    @GetMapping("/subList/{id}")
+    @GetMapping("/detail/{id}")
     public R subList(@PathVariable Long id) {
         QueryWrapper<KtvComment> wrapper = new QueryWrapper<>();
         wrapper.eq("parent_id", id);
@@ -64,6 +65,7 @@ public class KtvCommentController {
             ktvComment.setAccountId(accountId);
             ktvComment.setContent(content);
         }
+        ktvComment.setCreateTime(LocalDateTime.now());
         commentService.save(ktvComment);
         return R.out(ResponseEnum.SUCCESS);
     }
@@ -74,6 +76,9 @@ public class KtvCommentController {
     @DeleteMapping("/delete/{id}")
     public R delete(@PathVariable Long id) {
         commentService.removeById(id);
+        QueryWrapper<KtvComment> wrapper = new QueryWrapper<>();
+        wrapper.eq("parent_id", id);
+        commentService.remove(wrapper);
         return R.out(ResponseEnum.SUCCESS);
     }
 }

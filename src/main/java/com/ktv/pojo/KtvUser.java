@@ -39,12 +39,6 @@ public class KtvUser implements Serializable {
     private Long id;
 
     /**
-     * 昵称
-     */
-    @TableField("nick_name")
-    private String nickName;
-
-    /**
      * 账号
      */
     @TableField("account_id")
@@ -85,13 +79,5 @@ public class KtvUser implements Serializable {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime createTime;
-
-    /**
-     * 删除标识
-     */
-    @TableField(value = "deleted", fill = FieldFill.INSERT)
-    @TableLogic
-    private Boolean deleted;
-
 
 }

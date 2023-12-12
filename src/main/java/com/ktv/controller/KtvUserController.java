@@ -10,6 +10,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -38,7 +39,7 @@ public class KtvUserController {
         if (ObjectUtils.isEmpty(userPO)) {
             return R.out(ResponseEnum.FAIL);
         }
-        if (!password.equals(userPO)) {
+        if (!password.equals(userPO.getPassword())) {
             return R.out(ResponseEnum.FAIL);
         }
 
@@ -70,6 +71,7 @@ public class KtvUserController {
     @GetMapping("/list")
     public R getList() {
         QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
+        wrapper.ne("role", 1);
         List<KtvUser> userList = userService.list(wrapper);
         return R.out(ResponseEnum.SUCCESS, userList);
     }
@@ -77,24 +79,33 @@ public class KtvUserController {
     /**
      * 注册会员
      */
-    @PostMapping("/register/{accountId}")
-    public R register(@PathVariable String accountId) {
-        // 查询账户
-        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
-        wrapper.eq("account_id", accountId);
-        KtvUser userPO = userService.getOne(wrapper);
+    @PostMapping("/vip/register/{id}")
+    public R register(@PathVariable Long id) {
+        KtvUser userPO = userService.getById(id);
 
-        // 如果账户已经是vip了，就不要注册了
+        // 如果账户已经是vip了，变成庶民
         if (userPO.getRole().equals(6)) {
-            return R.out(ResponseEnum.SUCCESS, "已经是会员了，不能重复注册！");
+            KtvUser user = new KtvUser();
+            user.setId(userPO.getId());
+            user.setRole(5);
+            userService.updateById(user);
+        } else {
+            // 不是会员，注册成为会员
+            KtvUser user = new KtvUser();
+            user.setId(userPO.getId());
+            user.setRole(6);
+            userService.updateById(user);
         }
-
-        // 不是会员，注册成为会员
-        KtvUser user = new KtvUser();
-        user.setId(userPO.getId());
-        user.setRole(6);
-        userService.updateById(user);
         return R.out(ResponseEnum.SUCCESS);
+    }
+
+    /**
+     * 查询员工信息
+     */
+    @GetMapping("/detail/{id}")
+    public R detail(@PathVariable Long id) {
+        KtvUser userPO = userService.getById(id);
+        return R.out(ResponseEnum.SUCCESS, userPO);
     }
 
     /**
@@ -102,9 +113,7 @@ public class KtvUserController {
      */
     @DeleteMapping("/delete/{id}")
     public R deleteUser(@PathVariable Long id) {
-        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
-        wrapper.eq("id", id);
-        userService.remove(wrapper);
+        userService.removeById(id);
         return R.out(ResponseEnum.SUCCESS);
     }
 
@@ -144,6 +153,18 @@ public class KtvUserController {
         } else {
             return R.out(ResponseEnum.FAIL, "VIP状态更新失败");
         }
+    }
+
+    /**
+     * 保存用户信息
+     */
+    @PostMapping("/save")
+    public R saveUser(@RequestBody KtvUser user) {
+        user.setStatus("Y");
+        user.setCreateTime(LocalDateTime.now());
+        user.setMoney(0);
+        userService.saveOrUpdate(user);
+        return R.out(ResponseEnum.SUCCESS);
     }
 }
 

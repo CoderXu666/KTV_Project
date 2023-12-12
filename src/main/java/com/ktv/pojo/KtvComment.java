@@ -65,12 +65,4 @@ public class KtvComment implements Serializable {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime createTime;
 
-    /**
-     * 删除标识
-     */
-    @TableField(value = "deleted", fill = FieldFill.INSERT)
-    @TableLogic
-    private Boolean deleted;
-
-
 }
