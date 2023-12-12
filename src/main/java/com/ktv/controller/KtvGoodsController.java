@@ -13,6 +13,7 @@ import com.ktv.utils.ResponseEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -34,21 +35,19 @@ import java.util.List;
  * @since 2023-11-17
  */
 @RestController
-@RequestMapping("/goods")
+@RequestMapping("/menu")
 public class KtvGoodsController {
     @Autowired
     private KtvGoodsService ktvGoodsService;
-
     @Autowired
     private KtvOrderGoodsService ktvOrderGoodsService;
-
     @Autowired
     private KtvUserService ktvUserService;
 
     /**
      * 查询菜单
      */
-    @GetMapping("/getlist")
+    @GetMapping("/list")
     public R getlist() {
         List<KtvGoods> ktvGoods = ktvGoodsService.list();
         return R.out(ResponseEnum.SUCCESS, ktvGoods);
@@ -58,7 +57,7 @@ public class KtvGoodsController {
      * 下单菜品
      * 注意：菜品预定付全款
      */
-    @PostMapping("/bookGoods/{id}/{accountId}")
+    @PostMapping("/book/{id}/{accountId}")
     public R save(@PathVariable Long id, @PathVariable String accountId) {
         // 查询用户余额
         QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
@@ -75,10 +74,17 @@ public class KtvGoodsController {
         user.setMoney(moneys);
         ktvUserService.updateById(user);
 
+        // 查询商品信息
+        KtvGoods good = ktvGoodsService.getById(id);
+
         // 下单 (保存)
         KtvOrderGoods ktvOrderGoods = new KtvOrderGoods();
         ktvOrderGoods.setGoodId(id + "");
         ktvOrderGoods.setStatus(1);
+        ktvOrderGoods.setGoodName(good.getName());
+        ktvOrderGoods.setGoodUrl(good.getUrl());
+        ktvOrderGoods.setAccountId(accountId);
+        ktvOrderGoods.setCreateTime(LocalDateTime.now());
         ktvOrderGoodsService.save(ktvOrderGoods);
         return R.out(ResponseEnum.SUCCESS, "菜品下单成功");
     }

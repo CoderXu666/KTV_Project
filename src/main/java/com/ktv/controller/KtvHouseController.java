@@ -10,6 +10,7 @@ import com.ktv.service.KtvOrderHouseService;
 import com.ktv.service.KtvUserService;
 import com.ktv.utils.R;
 import com.ktv.utils.ResponseEnum;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -56,11 +59,28 @@ public class KtvHouseController {
     }
 
     /**
+     * 查询包房预定状态
+     */
+    @GetMapping("/getBookStatus/{accountId}")
+    public R getBookStatus(@PathVariable String accountId) {
+        QueryWrapper<KtvOrderHouse> wrapper = new QueryWrapper<>();
+        wrapper.eq("account_id", accountId);
+        List<KtvOrderHouse> orderHouseList = orderHouseService.list(wrapper);
+
+        // 过滤已使用订单
+        List<KtvOrderHouse> orderHouses = orderHouseList.stream()
+                .filter(item -> item.getStatus() != 1)
+                .collect(Collectors.toList());
+
+        return R.out(ResponseEnum.SUCCESS);
+    }
+
+    /**
      * 预定包房
      * 注意：预定前判断是否是会员
      */
     @PostMapping("/book")
-    public R bookHouse(String accountId, Long houseId, LocalDateTime bookTime) {
+    public R bookHouse(String accountId, Long houseId) {
         // 判断是否是会员
         QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
         wrapper.eq("account_id", accountId);
@@ -75,60 +95,58 @@ public class KtvHouseController {
             return R.out(ResponseEnum.FAIL, "该包房数量不足");
         }
 
-        // 交付定金
-        Integer money = userPO.getMoney();
-        Integer bookPrice = housePO.getBookPrice();
-        int leaveMoney = money - bookPrice;
+        // 判断是否预定了包房（预定了就取消）
+        QueryWrapper<KtvOrderHouse> wrapper1 = new QueryWrapper<>();
+        wrapper1.eq("account_id", accountId);
+        wrapper1.eq("house_id", houseId);
+        wrapper1.eq("status", 0);
+        KtvOrderHouse waitUseHouseOrder = orderHouseService.getOne(wrapper1);
+        if (!ObjectUtils.isEmpty(waitUseHouseOrder)) {
+            // 交付定金
+            Integer money = userPO.getMoney();
+            Integer bookPrice = housePO.getBookPrice();
+            int leaveMoney = money + bookPrice;
 
-        // 修改余额
-        userPO.setMoney(leaveMoney);
-        userService.updateById(userPO);
+            // 修改余额
+            userPO.setMoney(leaveMoney);
+            userService.updateById(userPO);
 
-        // 有的话，使用数量 + 1
-        Integer useCount = housePO.getUseCount();
-        housePO.setCount(useCount + 1);
-        houseService.saveOrUpdate(housePO);
+            // 有的话，使用数量 + 1
+            Integer useCount = housePO.getUseCount();
+            housePO.setUseCount(useCount - 1);
+            houseService.saveOrUpdate(housePO);
 
-        // 保存订单
-        KtvOrderHouse orderHouse = new KtvOrderHouse();
-        orderHouse.setAccountId(accountId);
-        orderHouse.setHouseId(houseId);
-        orderHouse.setStatus(0);
-        orderHouse.setCreateTime(bookTime);
-        orderHouseService.save(orderHouse);
-        return R.out(ResponseEnum.SUCCESS);
-    }
+            // 删除订单
+            orderHouseService.removeById(waitUseHouseOrder.getId());
+        } else {
+            // 交付定金
+            Integer money = userPO.getMoney();
+            Integer bookPrice = housePO.getBookPrice();
+            int leaveMoney = money - bookPrice;
 
-    /**
-     * 取消包房订单
-     */
-    @PostMapping("/cancel/{orderId}/{status}")
-    public R cancel(@PathVariable Long orderId, @PathVariable Integer status) {
-        // 修改包房订单状态
-        KtvOrderHouse orderHouse = new KtvOrderHouse();
-        orderHouse.setId(orderId);
-        orderHouse.setStatus(status);
-        orderHouseService.updateById(orderHouse);
+            // 修改余额
+            userPO.setMoney(leaveMoney);
+            userService.updateById(userPO);
 
-        // 已使用包房数 - 1
-        KtvOrderHouse order = orderHouseService.getById(orderId);
-        Long houseId = order.getHouseId();
-        KtvHouse house = houseService.getById(houseId);
-        Integer useCount = house.getUseCount();
-        int leaveCount = useCount - 1;
-        house.setUseCount(leaveCount);
-        houseService.updateById(house);
+            // 有的话，使用数量 + 1
+            Integer useCount = housePO.getUseCount();
+            housePO.setUseCount(useCount + 1);
+            houseService.saveOrUpdate(housePO);
 
-        // 预定金额在包房表，我要退钱！
-        Integer bookPrice = house.getBookPrice();
-        String accountId = order.getAccountId();
-        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
-        wrapper.eq("account_id", accountId);
-        KtvUser userPO = userService.getOne(wrapper);
-        Integer money = userPO.getMoney();
-        int leaveMoney = money - bookPrice;
-        userPO.setMoney(leaveMoney);
-        userService.updateById(userPO);
+            // 查询商品信息
+            KtvHouse house = houseService.getById(houseId);
+
+            // 保存订单
+            KtvOrderHouse orderHouse = new KtvOrderHouse();
+            orderHouse.setAccountId(accountId);
+            orderHouse.setHouseId(houseId);
+            orderHouse.setGoodName(house.getSize());
+            orderHouse.setGoodUrl(house.getUrl());
+            orderHouse.setStatus(0);
+            orderHouse.setCreateTime(LocalDateTime.now());
+            orderHouseService.save(orderHouse);
+        }
+
         return R.out(ResponseEnum.SUCCESS);
     }
 

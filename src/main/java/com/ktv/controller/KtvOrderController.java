@@ -32,8 +32,6 @@ public class KtvOrderController {
     private KtvOrderGoodsService goodsService;
     @Autowired
     private KtvOrderHouseService houseService;
-    @Autowired
-    private KtvHouseService ktvHouseService;
 
     /**
      * 用户查询订单
@@ -44,6 +42,7 @@ public class KtvOrderController {
         QueryWrapper<KtvOrderGoods> wrapper1 = new QueryWrapper<>();
         wrapper1.eq("account_id", accountId);
         List<KtvOrderGoods> goodOrderList = goodsService.list(wrapper1);
+
 
         // 查询包房订单信息
         QueryWrapper<KtvOrderHouse> wrapper2 = new QueryWrapper<>();

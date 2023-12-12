@@ -46,6 +46,18 @@ public class KtvOrderHouse implements Serializable {
     private Long houseId;
 
     /**
+     * 商品名称
+     */
+    @TableField("good_name")
+    private String goodName;
+
+    /**
+     * 商品图片
+     */
+    @TableField("good_url")
+    private String goodUrl;
+
+    /**
      * 订单状态（0：未使用，1：已使用，2：已取消）
      */
     @TableField("status")
@@ -59,6 +71,5 @@ public class KtvOrderHouse implements Serializable {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime createTime;
-
 
 }

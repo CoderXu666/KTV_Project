@@ -56,6 +56,18 @@ public class KtvOrderGoods implements Serializable {
     private String goodId;
 
     /**
+     * 商品名称
+     */
+    @TableField("good_name")
+    private String goodName;
+
+    /**
+     * 商品图片
+     */
+    @TableField("good_url")
+    private String goodUrl;
+
+    /**
      * 订单状态（0：未开始，1：进行中，2：已取消，3：完成制作，4：已完结）
      */
     @TableField("status")
