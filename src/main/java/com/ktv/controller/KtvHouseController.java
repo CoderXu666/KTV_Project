@@ -47,6 +47,15 @@ public class KtvHouseController {
     }
 
     /**
+     * 修改包房
+     */
+    @PostMapping("/update")
+    public R update(@RequestBody KtvHouse house) {
+        houseService.updateById(house);
+        return R.out(ResponseEnum.SUCCESS);
+    }
+
+    /**
      * 预定包房
      * 注意：预定前判断是否是会员
      */

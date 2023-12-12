@@ -65,7 +65,7 @@ public class KtvUserController {
     }
 
     /**
-     * 查询所有用户信息
+     * 查询所有用户列表
      */
     @GetMapping("/list")
     public R getList() {
