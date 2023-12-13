@@ -10,7 +10,6 @@ import com.ktv.service.KtvOrderHouseService;
 import com.ktv.service.KtvUserService;
 import com.ktv.utils.R;
 import com.ktv.utils.ResponseEnum;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,6 +47,22 @@ public class KtvHouseController {
     }
 
     /**
+     * 创建包房
+     */
+    @PostMapping("/save")
+    public R saveHouse(String size, Integer bookPrice, Integer price, Integer total, String url) {
+        KtvHouse ktvHouse = new KtvHouse();
+        ktvHouse.setSize(size);
+        ktvHouse.setBookPrice(bookPrice);
+        ktvHouse.setPrice(price);
+        ktvHouse.setCount(total);
+        ktvHouse.setUseCount(0);
+        ktvHouse.setUrl(url);
+        houseService.saveOrUpdate(ktvHouse);
+        return R.out(ResponseEnum.SUCCESS);
+    }
+
+    /**
      * 修改包房
      */
     @PostMapping("/update")
@@ -76,58 +91,29 @@ public class KtvHouseController {
             return R.out(ResponseEnum.FAIL, "该包房数量不足");
         }
 
-        // 判断是否预定了包房（预定了就取消）
+        // 判断是否预定了包房
         QueryWrapper<KtvOrderHouse> wrapper1 = new QueryWrapper<>();
         wrapper1.eq("account_id", accountId);
         wrapper1.eq("house_id", houseId);
         wrapper1.eq("status", 0);
         KtvOrderHouse waitUseHouseOrder = orderHouseService.getOne(wrapper1);
-        if (!ObjectUtils.isEmpty(waitUseHouseOrder)) {
-            // 交付定金
-            Integer money = userPO.getMoney();
-            Integer bookPrice = housePO.getBookPrice();
-            int leaveMoney = money + bookPrice;
 
-            // 修改余额
-            userPO.setMoney(leaveMoney);
-            userService.updateById(userPO);
+        // 交付定金
+        Integer money = userPO.getMoney();
+        Integer bookPrice = housePO.getBookPrice();
+        int leaveMoney = money + bookPrice;
 
-            // 有的话，使用数量 + 1
-            Integer useCount = housePO.getUseCount();
-            housePO.setUseCount(useCount - 1);
-            houseService.saveOrUpdate(housePO);
+        // 修改余额
+        userPO.setMoney(leaveMoney);
+        userService.updateById(userPO);
 
-            // 删除订单
-            orderHouseService.removeById(waitUseHouseOrder.getId());
-        } else {
-            // 交付定金
-            Integer money = userPO.getMoney();
-            Integer bookPrice = housePO.getBookPrice();
-            int leaveMoney = money - bookPrice;
+        // 有的话，使用数量 + 1
+        Integer useCount = housePO.getUseCount();
+        housePO.setUseCount(useCount - 1);
+        houseService.saveOrUpdate(housePO);
 
-            // 修改余额
-            userPO.setMoney(leaveMoney);
-            userService.updateById(userPO);
-
-            // 有的话，使用数量 + 1
-            Integer useCount = housePO.getUseCount();
-            housePO.setUseCount(useCount + 1);
-            houseService.saveOrUpdate(housePO);
-
-            // 查询商品信息
-            KtvHouse house = houseService.getById(houseId);
-
-            // 保存订单
-            KtvOrderHouse orderHouse = new KtvOrderHouse();
-            orderHouse.setAccountId(accountId);
-            orderHouse.setHouseId(houseId);
-            orderHouse.setGoodName(house.getSize());
-            orderHouse.setGoodUrl(house.getUrl());
-            orderHouse.setStatus(0);
-            orderHouse.setCreateTime(LocalDateTime.now());
-            orderHouseService.save(orderHouse);
-        }
-
+        // 删除订单
+        orderHouseService.removeById(waitUseHouseOrder.getId());
         return R.out(ResponseEnum.SUCCESS);
     }
 

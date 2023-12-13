@@ -47,7 +47,9 @@ public class KtvOrderController {
 
         // 查询包房订单信息
         QueryWrapper<KtvOrderHouse> wrapper2 = new QueryWrapper<>();
-        wrapper2.eq("account_id", accountId);
+        if (StringUtils.isNotEmpty(accountId)) {
+            wrapper2.eq("account_id", accountId);
+        }
         List<KtvOrderHouse> houseOrderList = houseService.list(wrapper2);
 
         // 返回
