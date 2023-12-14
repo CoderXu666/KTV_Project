@@ -48,9 +48,36 @@ public class KtvGoodsController {
      * 查询菜单
      */
     @GetMapping("/list")
-    public R getlist() {
+    public R getList() {
         List<KtvGoods> ktvGoods = ktvGoodsService.list();
         return R.out(ResponseEnum.SUCCESS, ktvGoods);
+    }
+
+    /**
+     * 查询菜单
+     */
+    @GetMapping("/detail/{id}")
+    public R detail(@PathVariable Long id) {
+        KtvGoods good = ktvGoodsService.getById(id);
+        return R.out(ResponseEnum.SUCCESS, good);
+    }
+
+    /**
+     * 修改菜单
+     */
+    @PostMapping("/update")
+    public R update(@RequestBody KtvGoods goods) {
+        ktvGoodsService.updateById(goods);
+        return R.out(ResponseEnum.SUCCESS);
+    }
+
+    /**
+     * 删除菜品订单
+     */
+    @DeleteMapping("/order/delete/{id}")
+    public R deleteMenu(@PathVariable Long id) {
+        ktvOrderGoodsService.removeById(id);
+        return R.out(ResponseEnum.SUCCESS);
     }
 
     /**
@@ -96,6 +123,10 @@ public class KtvGoodsController {
     public R cancellation(@PathVariable Long id) {
         // 菜品订单表改为取消状态
         KtvOrderGoods orderGoods = ktvOrderGoodsService.getById(id);
+        if (orderGoods.getStatus().equals(3)) {
+            return R.out(ResponseEnum.SUCCESS, "菜品已完成制作，不可退款！");
+        }
+
         orderGoods.setStatus(2);
         ktvOrderGoodsService.updateById(orderGoods);
 
