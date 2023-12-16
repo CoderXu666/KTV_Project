@@ -56,6 +56,31 @@ public class KtvHouseController {
     }
 
     /**
+     * 收银员：完成订单
+     */
+    @PostMapping("/finish/{id}")
+    public R finish(@PathVariable Long id) {
+        KtvOrderHouse orderHouse = orderHouseService.getById(id);
+        orderHouse.setStatus(1);
+        orderHouseService.updateById(orderHouse);
+
+        String accountId = orderHouse.getAccountId();
+        QueryWrapper<KtvUser> wrapper = new QueryWrapper<>();
+        wrapper.eq("account_id", accountId);
+        KtvUser ktvUser = userService.getOne(wrapper);
+
+        Long houseId = orderHouse.getHouseId();
+        KtvHouse houseInfo = houseService.getById(houseId);
+
+        Integer money = ktvUser.getMoney();
+        Integer remainMoney = money - (houseInfo.getPrice() - houseInfo.getBookPrice());
+
+        ktvUser.setMoney(remainMoney);
+        userService.updateById(ktvUser);
+        return R.out(ResponseEnum.SUCCESS);
+    }
+
+    /**
      * 创建包房
      */
     @PostMapping("/save")
